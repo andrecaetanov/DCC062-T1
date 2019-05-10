@@ -30,22 +30,24 @@ const char lottName[]="LOTT";
 //Deve envolver a inicializacao de possiveis parametros gerais
 //Deve envolver o registro do algoritmo junto ao escalonador
 void lottInitSchedInfo() {
+    SchedInfo *lSched = malloc(sizeof(SchedInfo)); //inicializa o SchedInfo
+    int slot = schedRegisterScheduler(lSched); //Registra o algoritmo
 	//...
 }
 
-//Inicializa os parametros de escalonamento de um processo p, chamada 
+//Inicializa os parametros de escalonamento de um processo p, chamada
 //normalmente quando o processo e' associado ao slot de Lottery
 void lottInitSchedParams(Process *p, void *params) {
 	//...
 }
 
-//Retorna o proximo processo a obter a CPU, conforme o algortimo Lottery 
+//Retorna o proximo processo a obter a CPU, conforme o algortimo Lottery
 Process* lottSchedule(Process *plist) {
 	//...
 	return NULL;
 }
 
-//Libera os parametros de escalonamento de um processo p, chamada 
+//Libera os parametros de escalonamento de um processo p, chamada
 //normalmente quando o processo e' desassociado do slot de Lottery
 //Retorna o numero do slot ao qual o processo estava associado
 int lottReleaseParams(Process *p) {
