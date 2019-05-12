@@ -15,7 +15,7 @@
 
 //Nome unico do algoritmo. Deve ter 4 caracteres.
 const char lottName[]="LOTT";
-
+int slot = -1;
 //=====Funcoes Auxiliares=====
 
 
@@ -30,13 +30,23 @@ const char lottName[]="LOTT";
 //Deve envolver a inicializacao de possiveis parametros gerais
 //Deve envolver o registro do algoritmo junto ao escalonador
 void lottInitSchedInfo() {
-	//...
+	//Cria um ponteiro pra estrutura SchedInfo
+	SchedInfo *si = malloc(sizeof(SchedInfo));
+ 
+	// Inicializacao de parametros geraais
+	strcpy(si->name, lottName);
+	si->initParamsFn = lottInitSchedParams;
+	si->scheduleFn = lottSchedule;
+	si->releaseParamsFn = lottReleaseParams;
+	// Registra o algoritmo junto ao escalonador
+	slot = schedRegisterScheduler(si);
 }
 
 //Inicializa os parametros de escalonamento de um processo p, chamada 
 //normalmente quando o processo e' associado ao slot de Lottery
 void lottInitSchedParams(Process *p, void *params) {
-	//...
+	processSetSchedParams(p,params);
+	processSetSchedSlot(p,slot);
 }
 
 //Retorna o proximo processo a obter a CPU, conforme o algortimo Lottery 
