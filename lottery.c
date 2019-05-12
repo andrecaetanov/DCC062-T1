@@ -18,10 +18,18 @@ const char lottName[]="LOTT";
 int slot = -1;
 //=====Funcoes Auxiliares=====
 
+int ticketsCount(Process *plist){
+	int count = 0;
+	Process* process = plist;
 
-
-
-
+	while(process != NULL){
+		if(processGetSchedSlot(process) ==  slot && (processGetStatus(process) == PROC_READY || processGetStatus(process) == PROC_RUNNING)){
+			count += ((LotterySchedParams*) processGetSchedParams(process))->num_tickets;
+		}
+		process = processGetNext(process);
+	}
+	return count;
+}
 
 //=====Funcoes da API=====
 
@@ -45,27 +53,49 @@ void lottInitSchedInfo() {
 //Inicializa os parametros de escalonamento de um processo p, chamada 
 //normalmente quando o processo e' associado ao slot de Lottery
 void lottInitSchedParams(Process *p, void *params) {
-	processSetSchedParams(p,params);
-	processSetSchedSlot(p,slot);
+	schedSetScheduler(p, params, slot);
 }
 
 //Retorna o proximo processo a obter a CPU, conforme o algortimo Lottery 
 Process* lottSchedule(Process *plist) {
-	//...
-	return NULL;
+
+	Process* process = plist;
+	/* Sorteia um ticket  de 1 ao total de tickets */
+    int randomTicket = 1 + rand() % ticketsCount(process);
+
+    while(process != NULL){
+		if(processGetSchedSlot(process) ==  slot && (processGetStatus(process) == PROC_READY || processGetStatus(process) == PROC_RUNNING)){
+			randomTicket -=((LotterySchedParams*) processGetSchedParams(process))->num_tickets;
+			if(randomTicket <= 0){
+				return process;
+			} 
+		}
+		process = processGetNext(process);
+	}
 }
 
 //Libera os parametros de escalonamento de um processo p, chamada 
 //normalmente quando o processo e' desassociado do slot de Lottery
 //Retorna o numero do slot ao qual o processo estava associado
 int lottReleaseParams(Process *p) {
-	//...
-	return 0;
+	LotterySchedParams *lsp_old = processGetSchedParams(p);
+	free(lsp_old);
+	return slot;
 }
 
 //Transfere certo numero de tickets do processo src para o processo dst.
 //Retorna o numero de tickets efetivamente transfeirdos (pode ser menos)
 int lottTransferTickets(Process *src, Process *dst, int tickets) {
-	//...
+	LotterySchedParams* srcParams = processGetSchedParams(src);
+	LotterySchedParams* dstParams = processGetSchedParams(dst);
+
+	if(srcParams->num_tickets > 0){
+		if(srcParams->num_tickets - tickets < 0){
+			tickets = srcParams->num_tickets - 1;
+		}
+			srcParams->num_tickets -= tickets;
+			dstParams->num_tickets += tickets;
+			return tickets;
+	}
 	return 0;
 }
